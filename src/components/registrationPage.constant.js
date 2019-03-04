@@ -3,6 +3,7 @@ export const registrationPageConstants = {
         MY_COMPANY: 'My Company',
         REGISTER: 'REGISTER',
         REGISTRATION_MAIN_LABEL: 'Enter your information below for exclusive offers, promotions and savings.',
+        FIELDS_REQUIRED_MESSAGE: '* Fields required'
     }
 };
 
