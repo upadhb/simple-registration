@@ -1,0 +1,16 @@
+$screen-sm: 767px; // Small screen
+$screen-lg: 768px; // Large screen
+
+@mixin breakpoint($class) {
+  @if $class == xs {
+    @media (max-width: $screen-sm) {
+      @content;
+    }
+  } @else if $class == sm {
+    @media (max-width: $screen-lg) {
+      @content;
+    }
+  } @else {
+    @warn 'Breakpoint mixin supports: xs, sm, md, lg';
+  }
+}

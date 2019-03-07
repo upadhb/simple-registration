@@ -1,3 +1,21 @@
+const getDays = () => {
+    const days = [];
+    for (let i = 1; i <= 31; i++) {
+        days.push(i)
+    }
+    return days;
+};
+
+const getYears = () => {
+    const currentYear = new Date().getFullYear();
+    const lastYearOption = currentYear - 100;
+    const years = [];
+    for (let i = lastYearOption; i <= currentYear; i++) {
+        years.unshift(i);
+    }
+    return years;
+};
+
 export const registrationPageConstants = {
     label: {
         MY_COMPANY: 'My Company',
@@ -9,8 +27,20 @@ export const registrationPageConstants = {
         PRIVACY_POLICY: 'Privacy Policy',
         ERROR_TITLE: 'The following errors have occurred:',
         IS_REQUIRED: ' is required',
+        BIRTH_DATE_TOOLTIP: 'Birth Month Day and Year are required',
+        MONTH: 'Month',
+        DAY: 'Day',
+        YEAR: 'Year',
     },
+    dateConstants: {
+        //ideally we would use a plugin for date/time
+        months: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'June', 'July', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'],
+        days: getDays(),
+        years: getYears(),
+    }
 };
+
+
 
 export const registrationFormData = () => {
     return {
@@ -48,10 +78,21 @@ export const registrationFormData = () => {
             id: 'birthDate',
             label: 'Birthdate',
             required: true,
-            isMultiSelect: true,
-            valueMonth: '',
-            valueDate: '',
-            valueYear: '',
+        },
+        birthMonth: {
+            id: 'birthMonth',
+            required: true,
+            value: '',
+        },
+        birthDay: {
+            id: 'birthDay',
+            required: true,
+            value: '',
+        },
+        birthYear: {
+            id: 'birthYear',
+            required: true,
+            value: '',
         },
         phoneNumber: {
             id: 'phoneNumber',
@@ -87,12 +128,12 @@ export const registrationFormData = () => {
         availableCountries: [
             {
                 id: 'countryOne',
-                icon: 'America icon',
+                icon: 'fas fa-flag-usa fa-2x',
                 value: 'usa'
             },
             {
                 id: 'countryTwo',
-                icon: 'Canada icon',
+                icon: 'fab fa-canadian-maple-leaf fa-2x',
                 value: 'canada'
             }
         ]

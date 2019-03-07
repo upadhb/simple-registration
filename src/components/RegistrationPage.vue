@@ -72,26 +72,53 @@
                            class="form-input"
                            v-model="registrationData.confirmPassword.value"/>
                 </div>
-                <div :class="['registration__form-item', hasError(registrationData.emailAddress) ? 'error-item' : '']">
+                <div class="registration__form-item">
                      <div class="form-label registration__birth">
-                         <div class="registration__birth-item">{{createFormLabel(registrationData.birthDate)}}</div>
-                         <div  class="registration__birth-item text-right">shit tooltip</div>
+                         <div :class="[birthDateError() ? 'error-label' : '']">
+                             {{createFormLabel(registrationData.birthDate)}}
+                         </div>
+                         <div class="registration__birth-item text-right">
+                             <div class="tooltip"> <i class="fa fa-question-circle form-blue-color"></i>
+                                 <span class="tooltiptext">{{registrationPageConstants.label.BIRTH_DATE_TOOLTIP}}</span>
+                             </div>
+                         </div>
                      </div>
                      <div class="registration__birth">
-                         <div class="registration__birth-item">
+                         <div :class="['registration__birth-item', hasError(registrationData.birthMonth) ? 'error-item' : '']">
                              <select id="birthMonth"
-                                     class="form-input"
-                                     v-model="registrationData.birthDate.valueMonth"></select>
+                                     :class="['form-input', registrationData.birthMonth.value ? '' : 'default-select']"
+                                     v-model="registrationData.birthMonth.value">
+                                 <option value="" disabled>{{registrationPageConstants.label.MONTH}}</option>
+                                 <option v-for="(month, index) in registrationPageConstants.dateConstants.months"
+                                         :value="month"
+                                         :key="index">
+                                     {{month}}
+                                 </option>
+                             </select>
                          </div>
-                         <div class="registration__birth-item registration__birth-item--day">
+                         <div :class="['registration__birth-item registration__birth-item--day', hasError(registrationData.birthDay) ? 'error-item' : '']">
                              <select id="birthDay"
-                                     class="form-input"
-                                     v-model="registrationData.birthDate.valueDate"></select>
+                                     :class="['form-input', registrationData.birthDay.value ? '' : 'default-select']"
+                                     v-model="registrationData.birthDay.value">
+                                 <option value="" disabled>{{registrationPageConstants.label.DAY}}</option>
+                                 <option v-for="(day, index) in registrationPageConstants.dateConstants.days"
+                                         :value="day"
+                                         :key="index">
+                                     {{day}}
+                                 </option>
+                             </select>
                          </div>
-                         <div class="registration__birth-item">
+                         <div :class="['registration__birth-item', hasError(registrationData.birthYear) ? 'error-item' : '']">
                              <select id="birthYear"
-                                     class="form-input"
-                                     v-model="registrationData.birthDate.valueYear"></select>
+                                     :class="['form-input', registrationData.birthYear.value ? '' : 'default-select']"
+                                     v-model="registrationData.birthYear.value">
+                                 <option value="" disabled>{{registrationPageConstants.label.YEAR}}</option>
+                                 <option v-for="(year, index) in registrationPageConstants.dateConstants.years"
+                                         :value="year"
+                                         :key="index">
+                                     {{year}}
+                                 </option>
+                             </select>
                          </div>
                      </div>
                 </div>
@@ -118,7 +145,7 @@
                                    :value="country.value"
                                    :checked="registrationData.country.value === country.value"
                                    @click="setSelectedCountry(country)"/>
-                            <label for="country.id">{{country.icon}}</label>
+                            <label for="country.id"><i :class="country.icon"></i></label>
                         </div>
                     </div>
 
@@ -136,8 +163,10 @@
                 </div>
             </div>
             <div class="registration__term-conditions">
-                <div :class="['registration__term-conditions--item', hasError(registrationData.confirmPassword) ? 'error-item' : '']">
-                    <input type="checkbox" id="termsAndConditions" v-model="registrationData.termsConditions.value"/>
+                <div :class="['registration__term-conditions--item', hasError(registrationData.termsConditions) ? 'error-item' : '']">
+                    <input type="checkbox"
+                           id="termsAndConditions"
+                           v-model="registrationData.termsConditions.value"/>
                     <label for="termsAndConditions">
                         <span>{{registrationData.termsConditions.label}}</span>
                         <span class="registration_link" @click.prevent="launchTermsConditions">
@@ -150,7 +179,9 @@
                     </label>
                 </div>
                 <div class="registration__term-conditions--item">
-                    <input type="checkbox" id="specialOffers" v-model="registrationData.specialOffers.value"/>
+                    <input type="checkbox"
+                           id="specialOffers"
+                           v-model="registrationData.specialOffers.value"/>
                     <label for="specialOffers">{{registrationData.specialOffers.label}}</label>
                 </div>
             </div>
@@ -162,10 +193,11 @@
                     {{registrationPageConstants.label.REGISTER}}
                 </button>
             </div>
-            <div class="registration__errors error-color" v-if="registrationFormErrors.length">
+            <div class="registration__errors error-color" v-if="registrationErrors.length">
                 <div>{{registrationPageConstants.label.ERROR_TITLE}}</div>
                 <ul>
-                    <li v-for="(error, index) in registrationFormErrors" :key="index">
+                    <li v-for="(error, index) in registrationErrors"
+                        :key="index">
                         {{error.value}}
                     </li>
                 </ul>
@@ -207,9 +239,11 @@
                         && !this.registrationData[item].value) {
                         const errorItem = this.registrationData[item];
                         error.id = errorItem.id;
-                        error.value = errorItem.requiredErrorLabel
-                            ? errorItem.requiredErrorLabel
-                            : `${errorItem.label} ${registrationPageConstants.label.IS_REQUIRED}`;
+                        if(this.registrationData[item].label) {
+                            error.value = errorItem.requiredErrorLabel
+                                ? errorItem.requiredErrorLabel
+                                : `${errorItem.label} ${registrationPageConstants.label.IS_REQUIRED}`;
+                        }
                         this.registrationFormErrors.push(error);
                     }
                 });
@@ -219,23 +253,51 @@
             },
             hasError(formItem) {
                 return this.registrationFormErrors.some(item => item.id === formItem.id);
-            }
+            },
+            birthDateError() {
+                const { birthMonth, birthDay, birthYear } = this.registrationData;
+                return this.registrationFormErrors
+                    .some(item => item.id === birthMonth.id || item.id === birthDay.id || item.id === birthYear.id);
+            },
         },
+        computed: {
+            registrationErrors() {
+                return this.registrationFormErrors && this.registrationFormErrors.length
+                    ? this.registrationFormErrors.filter(item => item.value)
+                    : []
+            }
+        }
     }
 </script>
 
 <style scoped lang="scss">
     @import "../commonStyles/commonClasses";
     @import "../commonStyles/_colors.scss";
+    @import "../commonStyles/_responsive.scss";
 
     .registration {
         padding: 10px 20px;
 
+        @include breakpoint(sm) {
+            padding: 10px 15px;
+        }
+
         &__company {
-            padding: 10px;
+            height: 36px;
+            width: 182px;
+            margin: 0 auto;
+
+            @include breakpoint(sm) {
+                height: 28px;
+                width: 157px;
+            }
 
             &-icon {
                 color: $yellow;
+
+                @include breakpoint(sm) {
+                    font-size: 14px;
+                }
             }
 
             &-label {
@@ -245,6 +307,11 @@
                 font-size: 22px;
                 position: relative;
                 top: -4px;
+
+                @include breakpoint(sm) {
+                    font-size: 16px;
+                    top: 0;
+                }
             }
         }
 
@@ -257,15 +324,27 @@
             font-weight: 600;
             padding: 35px 0;
             letter-spacing: -0.7px;
+            max-width: 1203px;
+            max-height: 179px;
+            margin: 0 auto;
+
+            @include breakpoint(sm) {
+                font-size: 50px;
+            }
         }
 
         &__form {
-
-            padding: 25px 300px;
+            max-width: 556px;
+            margin: 0 auto;
 
             &-body {
                 padding: 20px;
                 background-color: $light-gray;
+                margin: 0 auto;
+
+                @include breakpoint(sm) {
+                    padding: 15px;
+                }
             }
 
             &-item {
@@ -282,7 +361,6 @@
         }
 
         .form-input {
-            width: 100%;
             padding: 10px;
             display: inline-block;
             font-size: 18px;
@@ -290,6 +368,15 @@
             -moz-border-radius: 2px;
             border: 1px solid $light-gray;
             border-radius: 2px;
+            width: 100%;
+
+            @include breakpoint(sm) {
+                font-size: 12px;
+            }
+
+            option {
+                color: $dark-label;
+            }
         }
 
         .form-label {
@@ -310,6 +397,10 @@
 
                 &--day {
                     padding: 0 20px;
+
+                    @include breakpoint(sm) {
+                        padding: 0 3px;
+                    }
                 }
             }
         }
@@ -352,6 +443,10 @@
             padding: 20px 40px;
         }
 
+        .default-select {
+            color: $placeholder-text;
+        }
+
         .error-item {
             * {
                 color: $error-red !important;
@@ -360,6 +455,10 @@
             input, select {
                 border-color: $error-red;
             }
+        }
+
+        .error-label {
+            color: $error-red;
         }
 
     }
